@@ -1,0 +1,106 @@
+{
+  "accepted": "Mar 11 2020",
+  "superseded": "",
+  "epoch": "1983-2001",
+  "units": "feet",
+  "OrthometricDatum": "NAVD88",
+  "datums": [
+    {
+      "name": "STND",
+      "description": "Station Datum",
+      "value": 0.0
+    },
+    {
+      "name": "MHHW",
+      "description": "Mean Higher-High Water",
+      "value": 18.08
+    },
+    {
+      "name": "MHW",
+      "description": "Mean High Water",
+      "value": 17.91
+    },
+    {
+      "name": "DTL",
+      "description": "Mean Diurnal Tide Level",
+      "value": 17.13
+    },
+    {
+      "name": "MTL",
+      "description": "Mean Tide Level",
+      "value": 17.12
+    },
+    {
+      "name": "MSL",
+      "description": "Mean Sea Level",
+      "value": 17.11
+    },
+    {
+      "name": "MLW",
+      "description": "Mean Low Water",
+      "value": 16.32
+    },
+    {
+      "name": "MLLW",
+      "description": "Mean Lower-Low Water",
+      "value": 16.17
+    },
+    {
+      "name": "GT",
+      "description": "Great Diurnal Range",
+      "value": 1.92
+    },
+    {
+      "name": "MN",
+      "description": "Mean Range of Tide",
+      "value": 1.6
+    },
+    {
+      "name": "DHQ",
+      "description": "Mean Diurnal High Water Inequality",
+      "value": 0.17
+    },
+    {
+      "name": "DLQ",
+      "description": "Mean Diurnal Low Water Inequality",
+      "value": 0.15
+    },
+    {
+      "name": "HWI",
+      "description": "Greenwich High Water Interval (in hours)",
+      "value": 7.61
+    },
+    {
+      "name": "LWI",
+      "description": "Greenwich Low Water Interval (in hours)",
+      "value": 1.73
+    },
+    {
+      "name": "NAVD88",
+      "description": "North American Vertical Datum of 1988",
+      "value": 17.21
+    }
+  ],
+  "LAT": 15.571,
+  "LATdate": "20140201",
+  "LATtime": "15:12",
+  "HAT": 18.661,
+  "HATdate": "20280920",
+  "HATtime": "20:48",
+  "min": 12.966,
+  "mindate": "20180105",
+  "mintime": "04:36",
+  "max": 21.732,
+  "maxdate": "20211029",
+  "maxtime": "19:00",
+  "disclaimers": {
+    "disclaimers": [],
+    "self": null
+  },
+  "DatumAnalysisPeriod": [
+    "03/01/2016 - 02/28/2019"
+  ],
+  "NGSLink": "",
+  "ctrlStation": "8635750 Lewisetta, VA",
+  "self": "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations/8635027/datums.json"
+}

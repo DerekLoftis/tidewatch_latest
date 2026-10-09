@@ -28,7 +28,22 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python publish.py site
+      - run: pip install -r styler/requirements.txt
+      - name: Fetch the latest Tidewatch files
+        run: python publish.py site raw
+      # Datum lines, m30, disclaimer and logo (the capture thread's styler).
+      # A page that can't be styled keeps Tidewatch's original.
+      - name: Style the chart pages
+        continue-on-error: true
+        run: |
+          cd styler
+          for p in f36 3d 30d; do
+            [ -d ../site/$p ] || continue
+            python style_pages.py --product $p --pages ../site/$p --csv ../site/$p \
+              --pickles ../raw/f36 --out ../styled/$p --jsdir=../jslib || continue
+            cp ../styled/$p/*.html ../site/$p/
+          done
+          mkdir -p ../site/jslib && cp jslib/* vims_logo.png ../site/jslib/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
