@@ -11,6 +11,10 @@ keeping Tidewatch's own file names (for the public tidewatch_latest site).
 --jsdir    relative URL of a folder holding jquery.min.js, highcharts*.js,
            heatmap.js, exporting.js and vims_logo.png (copy them from this
            package's jslib/ and vims_logo.png); default --inline embeds them.
+--brand    vims (default) or stormsense: logo and disclaimer
+--thresholds  JSON {ST: {"datum": "MLLW"|"NAVD88", "action": ft, ...}} of NWS flood
+           categories, drawn on the NAVD charts (see make_thresholds.py)
+--navdlines=mllw  on NAVD charts keep only the MLLW datum line
 
 Pages for stations without datums (stale IDs) are copied unchanged, so every
 original name still exists in --out. Exit status 0 even when a page fails;
@@ -37,6 +41,9 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--jsdir")
     ap.add_argument("--inline", action="store_true")
+    ap.add_argument("--brand", default="vims")
+    ap.add_argument("--thresholds")
+    ap.add_argument("--navdlines")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     work = tempfile.mkdtemp()
@@ -61,7 +68,15 @@ def main():
         table = sa.stations(os.environ["TW_DATUMS"], pk_runs)
         tmp = os.path.join(work, "styled")
         os.makedirs(tmp)
-        done, probs = sa.style_run(run, a.product, table, pk_runs, tmp, jsdir=a.jsdir)
+        flood = None
+        if a.thresholds:
+            import json
+            flood = {}
+            for st, t in json.load(open(a.thresholds)).items():
+                flood[st] = os.path.join(work, "flood_%s.json" % st)
+                json.dump(t, open(flood[st], "w"))
+        options = ["--brand=" + a.brand] + (["--navdlines=" + a.navdlines] if a.navdlines else [])
+        done, probs = sa.style_run(run, a.product, table, pk_runs, tmp, jsdir=a.jsdir, options=options, flood=flood)
         for base, src in sorted(pages.items()):
             st, dat = base.split("_")[0], ("MLLW" if "_MLLW_hc" in base else "NAVD")
             tag = base.split("_%s_" % a.product)[0]

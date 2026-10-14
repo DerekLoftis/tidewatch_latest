@@ -40,7 +40,7 @@ jobs:
           for p in f36 3d 30d; do
             [ -d ../site/$p ] || continue
             python style_pages.py --product $p --pages ../site/$p --csv ../site/$p \
-              --pickles ../raw/f36 --out ../styled/$p --jsdir=../jslib || continue
+              --pickles ../raw/f36 --out ../styled/$p --jsdir=../jslib 2>&1 | tee -a ../site/style_log.txt || continue
             cp ../styled/$p/*.html ../site/$p/
           done
           mkdir -p ../site/jslib && cp jslib/* vims_logo.png ../site/jslib/

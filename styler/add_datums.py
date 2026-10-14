@@ -4,6 +4,7 @@ Tidewatch 3.0 Highcharts page.
     python3 add_datums.py STATION IN.html[.gz] PICKLE.pypickle[.gz] {MLLW,NAVD} OUT.html
         [--cdn | --inline] [--logo=PNG] [--datums=NOAA.json] [--twoffset=FT]
         [--datumsjson=FILE] [--rebase=DELTA] [--note=TEXT] [--jsdir=REL]
+        [--brand=stormsense] [--thresholds=FILE] [--floodoffset=FT] [--navdlines=mllw]
 
 Datums come from NOAA's metadata API (--datums, the raw response of
 mdapi/prod/webapi/stations/<id>/datums.json?units=english) and are converted to
@@ -12,6 +13,12 @@ m30 is the 30-day mean of the observations in the run's pickle (NAVD88), moved
 onto the MLLW chart with Tidewatch's own MLLW/NAVD offset (--twoffset, the
 constant gap between its _MLLW and _NAVD CSVs) so it sits on the same basis as
 the plotted data.
+
+--brand=stormsense swaps in the StormSense logo and disclaimer. --thresholds
+adds NWS flood category lines (Action, Minor, Moderate, Major) from a JSON
+object {"datum": "MLLW"|"NAVD88", "action": ft, "minor": ..., ...} in the gauge's
+own datum; --navdlines=mllw keeps only the MLLW line among the tidal datums on a
+NAVD chart. Every reference line can be hidden or shown by clicking its label.
 """
 import gzip
 import json
@@ -21,6 +28,14 @@ import pickle
 import sys
 
 DISCLAIMER = "Disclaimer: Tidewatch Charts\u2122 are automated storm tide forecasts; User assumes all risk"
+BRANDS = {
+    "vims": (DISCLAIMER, "vims_logo.png"),
+    "stormsense": ("Disclaimer: StormSense\u2122 Predictive Plots are computer-generated operational storm tide "
+                   "forecasts; the user assumes any and all risk.", "stormsense_logo.png"),
+}
+# NWS flood categories, colors as on NWPS hydrographs (water.noaa.gov)
+FLOOD = (("action", "Action", "#FFFF00"), ("minor", "Minor", "#FF9900"),
+         ("moderate", "Moderate", "#FF0000"), ("major", "Major", "#CC33FF"))
 
 DATUMS = {
     # ft above MLLW; navd88 = height of NAVD88 zero above MLLW
@@ -38,6 +53,8 @@ STYLE = {
     "m30": ("DashDot", 1.5, "#16687E"),  # VIMS teal
     "HAT+": ("Dot", 1, "#b0b0b0"),
 }
+STYLE.update({name: ("Solid", 2, color) for _, name, color in FLOOD})
+
 
 
 def read(path, mode="rt"):
@@ -90,28 +107,45 @@ def main(argv):
     shift = 0.0 if datum == "MLLW" else -navd  # MLLW heights -> NAVD heights
     m30 = m30_navd(pkl) + (twoff if datum == "MLLW" else 0.0)
     lines = []
-    for name in ("HAT", "MHHW", "MSL", "MLLW", "LAT", "NAVD88"):
+    keep = ("MLLW",) if opt.get("navdlines") == "mllw" and datum != "MLLW" else ("HAT", "MHHW", "MSL", "MLLW", "LAT", "NAVD88")
+    for name in keep:
         if name == "NAVD88":
             if navd is not None:
                 lines.append({"name": name, "value": round(navd + shift, 2)})
         elif name in d:
             lines.append({"name": name + (" (est.)" if name in est else ""), "value": round(d[name] + shift, 2),
                           "key": name})
+    if "thresholds" in opt:
+        t = json.load(open(opt["thresholds"]))
+        # gauge datum -> chart datum with Tidewatch's own MLLW-NAVD offset (--floodoffset,
+        # from the run's CSV pair), so the lines sit on the same basis as the plotted data
+        off = float(opt["floodoffset"]) if "floodoffset" in opt else (navd if navd is not None else twoff)
+        if t.get("datum", "MLLW") == "MLLW":
+            tshift = 0.0 if datum == "MLLW" else -off
+        else:  # NAVD88 gauge
+            tshift = 0.0 if datum != "MLLW" else off
+        if tshift is not None:
+            for key, name, _ in FLOOD:
+                v = t.get(key)
+                if v is not None and v > -999:
+                    lines.append({"name": name, "value": round(v + tshift, 2)})
     lines.append({"name": "m30", "value": round(m30, 2)})
-    hk = next(k for k in ("HAT", "MHHW", "MSL") if k in d)  # HAT+n steps from MHHW (or MSL) without a HAT
-    cfg = {"lines": lines, "hat": round(d[hk] + shift, 2), "hatName": hk, "style": STYLE, "datum": datum,
-           "disclaimer": DISCLAIMER, "logo": None, "logoAspect": 0.25, "note": opt.get("note")}
+    hats = len(keep) > 1  # HAT+n steps only with the full set of datum lines
+    hk = next((k for k in ("HAT", "MHHW", "MSL") if k in d), None)  # HAT+n steps from MHHW (or MSL) without a HAT
+    disclaimer, logo_name = BRANDS[opt.get("brand", "vims")]
+    cfg = {"lines": lines, "hat": round(d[hk] + shift, 2) if hats and hk else None, "hatName": hk, "style": STYLE,
+           "datum": datum, "disclaimer": disclaimer, "logo": None, "logoAspect": 0.25, "note": opt.get("note")}
     logo = next((a.split("=", 1)[1] for a in argv if a.startswith("--logo=")),
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), "vims_logo.png"))
-    if "jsdir" in opt:  # shared library folder next to the pages (archive bundles)
-        cfg["logo"] = opt["jsdir"].rstrip("/") + "/vims_logo.png"
-        cfg["logoAspect"] = 122 / 480.0
-    elif os.path.exists(logo):
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), logo_name))
+    if os.path.exists(logo):
         import base64, struct
         raw = open(logo, "rb").read()
         w, h = struct.unpack(">II", raw[16:24])  # PNG header
-        cfg["logo"] = "data:image/png;base64," + base64.b64encode(raw).decode()
         cfg["logoAspect"] = h / w
+        if "jsdir" in opt:  # shared library folder next to the pages (archive bundles)
+            cfg["logo"] = opt["jsdir"].rstrip("/") + "/" + os.path.basename(logo)
+        else:
+            cfg["logo"] = "data:image/png;base64," + base64.b64encode(raw).decode()
 
     js = """
             // --- tidal datum reference lines (added) ---
@@ -124,25 +158,30 @@ def main(argv):
                         if (v !== null && !isNaN(v)) { if (!res) dmax = Math.max(dmax, v); dmin = Math.min(dmin, v); }
                     });
                 });
-                var top = Math.max(2, Math.ceil(dmax - cfg.hat));
+                var hiLine = cfg.lines.reduce(function (a, l) { return Math.max(a, l.value); }, -1e9);
+                var top = cfg.hat === null ? 0 : Math.max(2, Math.ceil(dmax - cfg.hat));
                 var pl = [];
                 function add(name, value, key, label) {
-                    var st = cfg.style[key];
-                    pl.push({value: value, dashStyle: st[0], width: st[1], color: st[2], zIndex: 1,
+                    var st = cfg.style[key], flood = /^(Action|Minor|Moderate|Major)$/.test(key);
+                    pl.push({id: 'ref-' + name, value: value, dashStyle: st[0], width: st[1], color: st[2],
+                             zIndex: flood ? 2 : 1,
                              label: {text: label, align: 'right', textAlign: 'left', x: 6, y: 3,
-                                     style: {color: key === 'm30' ? st[2] : '#6f6f6f', fontSize: '10px'}}});
+                                     style: {color: key === 'm30' || flood ? st[2] : '#6f6f6f', fontSize: '10px',
+                                             fontWeight: flood ? 'bold' : 'normal',
+                                             textOutline: key === 'Action' ? '1px #8a7a00' : 'none'}}});
                 }
                 cfg.lines.forEach(function (l) {
                     add(l.name, l.value, l.key || l.name, l.name + ' ' + l.value.toFixed(2));
                 });
-                for (var n = 1; n <= top; n++) {
+                for (var n = 1; cfg.hat !== null && n <= top; n++) {
                     var v = cfg.hat + n;
                     add(cfg.hatName + '+' + n, v, 'HAT+', cfg.hatName + '+' + n + ' ' + v.toFixed(2));
                 }
                 var lo = Math.min(dmin, cfg.lines.reduce(function (a, l) { return Math.min(a, l.value); }, 1e9));
                 var ax = chart.yAxis[0];
                 chart.update({chart: {marginRight: 92}}, false);
-                ax.update({max: cfg.hat + top + 0.25, min: Math.floor(lo * 2) / 2 - 0.25,
+                var ymax = cfg.hat === null ? Math.ceil(Math.max(dmax, hiLine) * 2) / 2 + 0.25 : cfg.hat + top + 0.25;
+                ax.update({max: ymax, min: Math.floor(lo * 2) / 2 - 0.25,
                            tickInterval: 1, startOnTick: false, endOnTick: false});
                 // labels sit in the right margin; nudge apart any that would overlap
                 var order = pl.slice().sort(function (a, b) { return b.value - a.value; });
@@ -153,6 +192,25 @@ def main(argv):
                     prev = ly;
                 });
                 ax.update({plotLines: pl});
+
+                // click a line's label to hide or show the line (the label stays, faded)
+                var hidden = {};
+                var applyToggles = function () {
+                    ax.plotLinesAndBands.forEach(function (p) {
+                        var id = p.options.id, off = !!hidden[id];
+                        if (!id) return;
+                        if (p.svgElem) p.svgElem.attr({visibility: off ? 'hidden' : 'visible'});
+                        if (p.label) {
+                            p.label.attr({opacity: off ? 0.35 : 1}).css({cursor: 'pointer'});
+                            if (!p.label.twToggle) {
+                                p.label.twToggle = true;
+                                p.label.on('click', function () { hidden[id] = !hidden[id]; applyToggles(); });
+                            }
+                        }
+                    });
+                };
+                applyToggles();
+                Highcharts.addEvent(chart, 'redraw', applyToggles);
 
                 // disclaimer under the "Latest Observation" axis title
                 var xa = chart.xAxis[0];

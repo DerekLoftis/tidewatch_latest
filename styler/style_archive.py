@@ -94,8 +94,10 @@ def tw_offset(run, tag, prod):
         return None
 
 
-def style_run(run, prod, table, pk_runs, out_dir, jsdir=None):
-    """Style every page in one run into out_dir. Returns (done, problems)."""
+def style_run(run, prod, table, pk_runs, out_dir, jsdir=None, options=(), flood=None, flood_datums=("NAVD",)):
+    """Style every page in one run into out_dir. Returns (done, problems).
+    options: extra add_datums.py flags (e.g. --brand=stormsense); flood: {ST: thresholds
+    json path}, drawn on the charts whose datum is in flood_datums."""
     done, probs = 0, []
     for src in sorted(glob.glob(os.path.join(run, "*_hc.html.gz"))):
         name = os.path.basename(src)
@@ -118,6 +120,11 @@ def style_run(run, prod, table, pk_runs, out_dir, jsdir=None):
             extra = ["--datumsjson=" + s["file"]] + (["--twoffset=%s" % tw] if tw is not None else [])
         if s.get("note"):
             extra.append("--note=" + s["note"])
+        if flood and st in flood and dat in flood_datums:
+            extra.append("--thresholds=" + flood[st])
+            if tw is not None:
+                extra.append("--floodoffset=%s" % tw)
+        extra += list(options)
         extra += ["--jsdir=" + jsdir] if jsdir else ["--inline"]
         dst = os.path.join(out_dir, "%s_%s_%s_hc_datums.html" % (tag, prod, dat))
         r = subprocess.run([sys.executable, os.path.join(here, "add_datums.py"), st, src, pk, dat, dst] + extra,
