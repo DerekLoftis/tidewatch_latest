@@ -166,9 +166,8 @@ def main(argv):
                     pl.push({id: 'ref-' + name, value: value, dashStyle: st[0], width: st[1], color: st[2],
                              zIndex: flood ? 2 : 1,
                              label: {text: label, align: 'right', textAlign: 'left', x: 6, y: 3,
-                                     style: {color: key === 'm30' || flood ? st[2] : '#6f6f6f', fontSize: '10px',
-                                             fontWeight: flood ? 'bold' : 'normal',
-                                             textOutline: key === 'Action' ? '1px #8a7a00' : 'none'}}});
+                                     style: {color: key === 'Action' ? '#a39700' : (key === 'm30' || flood ? st[2] : '#6f6f6f'),
+                                             fontSize: '10px', fontWeight: flood ? 'bold' : 'normal'}}});
                 }
                 cfg.lines.forEach(function (l) {
                     add(l.name, l.value, l.key || l.name, l.name + ' ' + l.value.toFixed(2));

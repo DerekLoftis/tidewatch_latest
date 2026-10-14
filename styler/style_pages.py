@@ -57,6 +57,10 @@ def main():
             base = os.path.basename(p).replace(".gz", "")
             if "_%s_" % a.product not in base:
                 continue
+            # Tidewatch's 30d folder also holds stale <ST>_2018_30d_NAVD_hc.html pages; the
+            # current NAVD page has no datum in its name, and both would style to one file
+            if "_NAVD_hc.html" in base and os.path.exists(os.path.join(a.pages, base.replace("_NAVD_hc", "_hc"))):
+                continue
             open(os.path.join(run, base + ".gz"), "wb").write(gzip.compress(read(p)))
             pages[base] = p
         for p in glob.glob(os.path.join(a.csv, "*_%s_*.csv" % a.product)):
