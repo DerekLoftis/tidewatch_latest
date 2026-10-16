@@ -18,9 +18,9 @@ from datetime import datetime, timezone
 TIDEWATCH_URL = os.environ.get("TIDEWATCH_URL", "https://web4.vims.edu/physical/tidewatch/")
 UA = {"User-Agent": "tidewatch-latest (VIMS)"}
 # The NAVD chart page has no datum in its name (SWPT_2018_f36_hc.html).
-NAME = re.compile(r"^([A-Z0-9]+)_\d{4}_(f36|3d|30d)(?:_(MLLW|NAVD))?(_hc\.html|\.csv)$")
+NAME = re.compile(r"^([A-Z0-9-]+)_\d{4}_(f36|3d|30d)(?:_(MLLW|NAVD))?(_hc\.html|\.csv)$")
 # f36 pickles: not published, but the datum styler needs them (m30, station list)
-PICKLE = re.compile(r"^[A-Z0-9]+_\d{4}_f36\.pypickle$")
+PICKLE = re.compile(r"^[A-Z0-9-]+_\d{4}_f36\.pypickle$")
 
 
 def get(url, tries=3):
@@ -119,6 +119,11 @@ Money Point is converted from MLLW with NOAA VDatum (NAVD88 zero 1.92 and 1.77 f
 <p>BRDH (Back River at Dandy Haven), a Classic Tidewatch station missing from the current Tidewatch, is built
 the same way from the VIMS radar gauge's 1-minute record on the VIMS THREDDS server (MLLW 9.71 ft below the
 gauge), with Sewells Point's P-ETSS surge and NAVD88 from NOAA VDatum (1.63 ft above MLLW).</p>
+<p>USLN-X is the experimental FloodVISION-AI webcam water level at Little Neck Creek at Pinewood Road
+(the same place as USLN, USGS 0204295505): water levels inferred by machine learning from the USGS webcam images
+(the model retrained after the September 2026 nor'easter, live since 2026-10-08 9:12 PM EDT), archived every
+6 hours in <a href="https://github.com/DerekLoftis/tidewatch_latest/tree/main/floodvision">floodvision/</a>, with
+USLN's harmonic tide, datums and P-ETSS surge.</p>
 <p>Disclaimer: Tidewatch Charts(TM) are automated storm tide forecasts; User assumes all risk.</p>
 <div style="overflow-x:auto"><table><tr><th>Station</th>{head}</tr>
 {chr(10).join(rows)}

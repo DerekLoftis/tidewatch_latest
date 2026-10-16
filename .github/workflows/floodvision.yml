@@ -1,0 +1,38 @@
+# Archive FloodVISION-AI's webcam water levels for USLN-X (floodvision.py) ahead of each
+# 6-hourly publish; the site keeps about 30 days, so a missed run loses nothing.
+name: Archive FloodVISION USLN-X
+
+on:
+  schedule:
+    - cron: "50 5,11,17,23 * * *"
+    - cron: "5 0,6,12,18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: floodvision
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          pip install playwright==1.47.0
+          python -m playwright install --with-deps chromium
+      - run: python floodvision.py floodvision
+      - name: Commit new rows
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898237+github-actions[bot]@users.noreply.github.com"
+          git add floodvision
+          git diff --cached --quiet && exit 0
+          git commit -m "FloodVISION USLN-X capture $(date -u +%Y-%m-%dT%H:%MZ)"
+          git pull --rebase -q origin main && git push -q origin HEAD:main

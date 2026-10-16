@@ -8,6 +8,9 @@ stale or mismatched, written over Tidewatch's own files so everything downstream
     WADC  Washington DC 8594900                  Tidewatch shows another gauge's record
     BRDH  Back River Dandy Haven (VIMS gauge)    Classic Tidewatch only; observations from
                                                  VIMS THREDDS, surge from Sewells Point P-ETSS
+    USLN-X Little Neck Creek webcam (FloodVISION-AI) ML water levels from the USGS webcam at
+                                                 USLN (floodvision.py archive); USLN's tide,
+                                                 datums and P-ETSS surge
 
 For each station and run:
 - Observations: the last 31 days of 6-minute water levels from the CO-OPS Data API,
@@ -67,6 +70,12 @@ STATIONS = {
              "surge_from": "8638610", "surge_name": "Sewells Point", "msl": 1.286,
              "name": "Back River Dandy Haven", "lat": 37.0976, "navd": 1.63,
              "navd_source": "NOAA VDatum (MDVAchb12 grid); VIMS radar gauge, MLLW 9.71 ft below the gauge"},
+    # FloodVISION-AI: water levels inferred from the USGS webcam at Little Neck Creek (USLN), ft NAVD88;
+    # only the model retrained after the Sept 2026 nor'easter (v2) is used. Harmonics from USLN's radar.
+    "USLN-X": {"floodvision": "https://raw.githubusercontent.com/DerekLoftis/tidewatch_latest/main/floodvision/",
+               "model": "v2", "surge_from": "est2340", "surge_name": "Little Neck Creek (USLN)", "msl": 0.951,
+               "name": "Little Neck Creek at Pinewood Rd webcam (FloodVISION-AI)", "lat": 36.8593, "navd": 1.372,
+               "navd_source": "NOAA VDatum (VAswchb11 grid, corrected), as at USGS 0204295505 (USLN)"},
 }
 CONSTITUENTS = ["M2", "S2", "N2", "K1", "O1", "K2", "P1", "Q1", "NU2", "MU2", "2N2", "L2", "T2", "LDA2", "J1",
                 "OO1", "NO1", "RHO1", "2Q1", "MK3", "MO3", "M3", "M4", "MS4", "MN4", "S4", "M6"]
@@ -102,6 +111,8 @@ def observations(st):
     info = STATIONS[st]
     if "thredds" in info:
         return thredds_observations(info["thredds"], info["gauge_mllw"])
+    if "floodvision" in info:
+        return floodvision_observations(st, info)
     return parse_coops(get(API.format(id=info["noaa"], product="water_level") + "&range=744"))
 
 
@@ -122,20 +133,53 @@ def thredds_observations(url, gauge_mllw, days=31):
     o = np.argsort(secs[ok], kind="stable")
     t, v = t[o], v[o]
     keep = (v > -4) & (v < 10) & (t > t[-1] - timedelta(days=days))
-    t, v = t[keep], v[keep]
-    if len(v) > 15:  # spikes: more than 0.5 ft off the 15-minute running median
-        import pandas as pd
-        med = pd.Series(v).rolling(15, center=True, min_periods=5).median().to_numpy()
-        keep = np.abs(v - med) <= 0.5
-        t, v = t[keep], v[keep]
+    t, v = despike(t[keep], v[keep], 15)
     six = np.array([x.minute % 6 == 0 for x in t], bool)
     t, v = t[six], v[six]
     _, first = np.unique(t, return_index=True)
     return t[first], v[first]
 
 
+def despike(t, v, window):
+    """Drop values more than 0.5 ft off the running median of `window` points."""
+    if len(v) > window:
+        import pandas as pd
+        med = pd.Series(v).rolling(window, center=True, min_periods=max(3, window // 3)).median().to_numpy()
+        keep = np.abs(v - med) <= 0.5
+        t, v = t[keep], v[keep]
+    return t, v
+
+
+def floodvision_observations(st, info, days=31):
+    """FloodVISION-AI webcam water levels (this and last month's archive files), ft above MLLW."""
+    rows = {}
+    end = now()
+    for m in sorted({(end - timedelta(days=d)).strftime("%Y-%m") for d in (0, days)}):
+        name = f"{st}_{m}.csv"
+        local = os.path.join(HERE, "floodvision", name)
+        try:
+            text = get(info["floodvision"] + name).decode()
+        except Exception:
+            if not os.path.exists(local):
+                continue
+            text = open(local).read()
+        for r in csv.DictReader(io.StringIO(text)):
+            if r["model"] == info["model"] and r["ml_ft_navd88"]:
+                rows[r["time_utc"]] = float(r["ml_ft_navd88"]) + info["navd"]
+    t = np.array([datetime.strptime(k, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc) for k in sorted(rows)])
+    v = np.array([rows[k] for k in sorted(rows)])
+    if not len(t):
+        return t, v
+    keep = (v > -4) & (v < 10) & (t > t[-1] - timedelta(days=days))
+    t, v = despike(t[keep], v[keep], 7)
+    t = np.array([x.replace(second=0) for x in t])
+    return t, v
+
+
 def source_label(st):
     info = STATIONS[st]
+    if "floodvision" in info:
+        return "FloodVISION-AI webcam (USGS 0204295505)"
     return f"VIMS gauge {st}" if "thredds" in info else f"NOAA CO-OPS {info['noaa']}"
 
 
@@ -322,7 +366,7 @@ def write_station(st, b, dirs, pickles):
     info = STATIONS[st]
     sub = f"{source_label(st)} observations; harmonic tide referenced to m30"
     if info.get("surge_from"):
-        sub += f"; surge from P-ETSS at NOAA {info['surge_from']}"
+        sub += f"; surge from P-ETSS at {info.get('surge_name', info['surge_from'])}"
     for datum, label, shift in (("MLLW", "MLLW", 0.0), ("NAVD", "NAVD88", -info["navd"])):
         # f36: Tidewatch's CSV columns (pa30 = m30 tide, anom = forecast residual, px30 = forecast)
         if "f36" in dirs:
@@ -369,8 +413,8 @@ def write_station(st, b, dirs, pickles):
         if meta is None:
             meta = pd.DataFrame([{"station_name": st, "long_name": info["name"], "status": "active"}])
         meta = meta.copy()
-        if "thredds" in info:  # the datum styler then reads styler/stations_usgs/_datums/<ST>.json
-            meta["scheme"], meta["scheme_id"] = info["thredds"], st
+        if "thredds" in info or "floodvision" in info:  # the styler then reads stations_usgs/_datums/<ST>.json
+            meta["scheme"], meta["scheme_id"] = info.get("thredds") or info["floodvision"], st
         else:
             meta["scheme"] = ("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level"
                               "&datum=MLLW&units=english&time_zone=gmt&format=json")
