@@ -42,7 +42,8 @@ def render(title, wait_ms=20000):
         page.wait_for_timeout(wait_ms)
         for label in ("I Accept", "30 days"):
             try:
-                page.get_by_text(label, exact=True).first.click(timeout=10000)
+                # the graph overlays the range buttons, so click them in the page rather than by pointer
+                page.get_by_text(label, exact=True).first.evaluate("e => e.click()", timeout=10000)
                 page.wait_for_timeout(wait_ms)
             except Exception as e:
                 print(f"greenstream: could not click {label!r}: {e}")
