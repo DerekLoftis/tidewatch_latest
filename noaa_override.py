@@ -11,6 +11,9 @@ stale or mismatched, written over Tidewatch's own files so everything downstream
     USLN-X Little Neck Creek webcam (FloodVISION-AI) ML water levels from the USGS webcam at
                                                  USLN (floodvision.py archive); USLN's tide,
                                                  datums and P-ETSS surge
+    CNRC  Accokeek Creek at Crow's Nest (VIMS    GreenStream/VDEM sensor (greenstream.py archive);
+          sensor on GreenStream)                 tide fitted to the archive itself, Dahlgren's
+                                                 P-ETSS surge
 
 For each station and run:
 - Observations: the last 31 days of 6-minute water levels from the CO-OPS Data API,
@@ -56,6 +59,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 UA = {"User-Agent": "VIMS StormSense/Tidewatch (noaa_override)"}
 API = ("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?application=VIMS_StormSense&units=english"
        "&time_zone=gmt&format=json&datum=MLLW&station={id}&product={product}")
+RAW = "https://raw.githubusercontent.com/DerekLoftis/tidewatch_latest/main/"
 STATIONS = {
     "CBBT": {"noaa": "8638901", "name": "Chesapeake Bay Bridge Tunnel", "lat": 37.0329, "navd": 1.92,
              "navd_source": "NOAA VDatum (MDVAchb12 grid); NOAA publishes no NAVD88 here"},
@@ -72,13 +76,22 @@ STATIONS = {
              "navd_source": "NOAA VDatum (MDVAchb12 grid); VIMS radar gauge, MLLW 9.71 ft below the gauge"},
     # FloodVISION-AI: water levels inferred from the USGS webcam at Little Neck Creek (USLN), ft NAVD88;
     # only the model retrained after the Sept 2026 nor'easter (v2) is used. Harmonics from USLN's radar.
-    "USLN-X": {"floodvision": "https://raw.githubusercontent.com/DerekLoftis/tidewatch_latest/main/floodvision/",
-               "model": "v2", "surge_from": "est2340", "surge_name": "Little Neck Creek (USLN)", "msl": 0.951,
+    "USLN-X": {"archive": RAW + "floodvision/", "column": "ml_ft_navd88", "model": "v2", "despike": 7,
+               "source": "FloodVISION-AI webcam (USGS 0204295505)", "surge_from": "est2340", "surge_name": "Little Neck Creek (USLN)", "msl": 0.951,
                "name": "Little Neck Creek at Pinewood Rd webcam (FloodVISION-AI)", "lat": 36.8593, "navd": 1.372,
                "navd_source": "NOAA VDatum (VAswchb11 grid, corrected), as at USGS 0204295505 (USLN)"},
+    # GreenStream (VDEM Virginia Flood Monitoring System) sensor run by VIMS, 5-minute, ft NAVD88.
+    # Too new for a year of record: the tide is fitted to everything archived since 2026-10 (see
+    # harmonic_fit), so it sharpens as the archive grows. Surge: Dahlgren's P-ETSS, 22 km downriver.
+    "CNRC": {"archive": RAW + "greenstream/", "column": "level_ft_navd88", "since": "2026-09", "despike": 7,
+             "source": "GreenStream sensor (VDEM Virginia Flood Monitoring System)",
+             "surge_from": "8635027", "surge_name": "Dahlgren", "msl": 0.756,
+             "name": "Accokeek Creek at Crow's Nest Research Center", "lat": 38.3626, "navd": 0.691,
+             "navd_source": "NOAA VDatum (MDVAchb12 grid)"},
 }
 CONSTITUENTS = ["M2", "S2", "N2", "K1", "O1", "K2", "P1", "Q1", "NU2", "MU2", "2N2", "L2", "T2", "LDA2", "J1",
                 "OO1", "NO1", "RHO1", "2Q1", "MK3", "MO3", "M3", "M4", "MS4", "MN4", "S4", "M6"]
+SHORT_RECORD = ["M2", "S2", "N2", "K1", "O1", "Q1", "2N2", "L2", "MK3", "M4", "MS4", "MN4", "M6"]
 SURGE_FACTOR = 0.7
 STEP = timedelta(minutes=6)
 NY = ZoneInfo("America/New_York")
@@ -111,8 +124,8 @@ def observations(st):
     info = STATIONS[st]
     if "thredds" in info:
         return thredds_observations(info["thredds"], info["gauge_mllw"])
-    if "floodvision" in info:
-        return floodvision_observations(st, info)
+    if "archive" in info:
+        return archive_observations(st, info)
     return parse_coops(get(API.format(id=info["noaa"], product="water_level") + "&range=744"))
 
 
@@ -150,36 +163,51 @@ def despike(t, v, window):
     return t, v
 
 
-def floodvision_observations(st, info, days=31):
-    """FloodVISION-AI webcam water levels (this and last month's archive files), ft above MLLW."""
+def archive_rows(st, info, months):
+    """{time: ft above MLLW} from the monthly archive CSVs that floodvision.py and greenstream.py
+    keep in this repository (read from GitHub, else from this checkout)."""
     rows = {}
-    end = now()
-    for m in sorted({(end - timedelta(days=d)).strftime("%Y-%m") for d in (0, days)}):
+    for m in months:
         name = f"{st}_{m}.csv"
-        local = os.path.join(HERE, "floodvision", name)
+        local = os.path.join(HERE, info["archive"].rstrip("/").rsplit("/", 1)[1], name)
         try:
-            text = get(info["floodvision"] + name).decode()
+            text = get(info["archive"] + name, tries=1).decode()
         except Exception:
             if not os.path.exists(local):
                 continue
             text = open(local).read()
         for r in csv.DictReader(io.StringIO(text)):
-            if r["model"] == info["model"] and r["ml_ft_navd88"]:
-                rows[r["time_utc"]] = float(r["ml_ft_navd88"]) + info["navd"]
+            if r[info["column"]] and r.get("model", info.get("model")) == info.get("model"):
+                rows[r["time_utc"]] = float(r[info["column"]]) + info["navd"]
+    return rows
+
+
+def months_between(a, b):
+    out, (y, m) = [], (a.year, a.month)
+    while (y, m) <= (b.year, b.month):
+        out.append(f"{y:04d}-{m:02d}")
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    return out
+
+
+def archive_observations(st, info, days=31):
+    """Archived water levels (this and last month's files), quality-controlled, ft above MLLW."""
+    end = now()
+    rows = archive_rows(st, info, months_between(end - timedelta(days=days), end))
     t = np.array([datetime.strptime(k, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc) for k in sorted(rows)])
     v = np.array([rows[k] for k in sorted(rows)])
     if not len(t):
         return t, v
     keep = (v > -4) & (v < 10) & (t > t[-1] - timedelta(days=days))
-    t, v = despike(t[keep], v[keep], 7)
+    t, v = despike(t[keep], v[keep], info.get("despike", 7))
     t = np.array([x.replace(second=0) for x in t])
     return t, v
 
 
 def source_label(st):
     info = STATIONS[st]
-    if "floodvision" in info:
-        return "FloodVISION-AI webcam (USGS 0204295505)"
+    if "source" in info:
+        return info["source"]
     return f"VIMS gauge {st}" if "thredds" in info else f"NOAA CO-OPS {info['noaa']}"
 
 
@@ -199,13 +227,24 @@ _fits = {}
 def harmonic_fit(st):
     import utide
     if st not in _fits:
-        rows = list(csv.reader(io.StringIO(gzip.open(os.path.join(HERE, "harmonics", f"{st}_hourly.csv.gz"))
-                                           .read().decode())))[1:]
-        t = np.array([np.datetime64(r[0]) for r in rows])
-        h = np.array([float(r[1]) for r in rows])
+        path = os.path.join(HERE, "harmonics", f"{st}_hourly.csv.gz")
+        if os.path.exists(path):
+            rows = list(csv.reader(io.StringIO(gzip.open(path).read().decode())))[1:]
+            t = np.array([np.datetime64(r[0]) for r in rows])
+            h = np.array([float(r[1]) for r in rows])
+        else:  # a new gauge: its archive so far, top of each hour (last 369 days)
+            info = STATIONS[st]
+            end = now()
+            since = max(datetime.strptime(info["since"], "%Y-%m").replace(tzinfo=timezone.utc), end - timedelta(days=369))
+            rows = {k: v for k, v in archive_rows(st, info, months_between(since, end)).items() if k[14:16] == "00"}
+            t = np.array([np.datetime64(k[:19]) for k in sorted(rows)])
+            h = np.array([rows[k] for k in sorted(rows)])
+        # under ~6 months of record: only constituents a month separates (Rayleigh criterion), and no
+        # long-period ones, which would soak up storm and seasonal water level (m30 carries that)
+        constit = CONSTITUENTS if len(h) > 24 * 180 else SHORT_RECORD
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            _fits[st] = utide.solve(t, h, lat=STATIONS[st]["lat"], constit=CONSTITUENTS, method="ols",
+            _fits[st] = utide.solve(t, h, lat=STATIONS[st]["lat"], constit=constit, method="ols",
                                     conf_int="none", trend=False, nodal=True, verbose=False)
     return _fits[st]
 
@@ -413,8 +452,8 @@ def write_station(st, b, dirs, pickles):
         if meta is None:
             meta = pd.DataFrame([{"station_name": st, "long_name": info["name"], "status": "active"}])
         meta = meta.copy()
-        if "thredds" in info or "floodvision" in info:  # the styler then reads stations_usgs/_datums/<ST>.json
-            meta["scheme"], meta["scheme_id"] = info.get("thredds") or info["floodvision"], st
+        if "thredds" in info or "archive" in info:  # the styler then reads stations_usgs/_datums/<ST>.json
+            meta["scheme"], meta["scheme_id"] = info.get("thredds") or info["archive"], st
         else:
             meta["scheme"] = ("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level"
                               "&datum=MLLW&units=english&time_zone=gmt&format=json")

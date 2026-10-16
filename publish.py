@@ -124,6 +124,11 @@ gauge), with Sewells Point's P-ETSS surge and NAVD88 from NOAA VDatum (1.63 ft a
 (the model retrained after the September 2026 nor'easter, live since 2026-10-08 9:12 PM EDT), archived every
 6 hours in <a href="https://github.com/DerekLoftis/tidewatch_latest/tree/main/floodvision">floodvision/</a>, with
 USLN's harmonic tide, datums and P-ETSS surge.</p>
+<p>CNRC (Accokeek Creek at Crow's Nest Research Center) is the VIMS sensor on GreenStream's Virginia Flood
+Monitoring System (VDEM), archived every 6 hours in
+<a href="https://github.com/DerekLoftis/tidewatch_latest/tree/main/greenstream">greenstream/</a>. Its tide is
+fitted to that archive (13 constituents until it holds 6 months, then 27), with Dahlgren's P-ETSS surge and
+NAVD88 from NOAA VDatum (0.69 ft above MLLW).</p>
 <p>Disclaimer: Tidewatch Charts(TM) are automated storm tide forecasts; User assumes all risk.</p>
 <div style="overflow-x:auto"><table><tr><th>Station</th>{head}</tr>
 {chr(10).join(rows)}
