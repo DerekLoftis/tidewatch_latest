@@ -62,7 +62,7 @@ def main(site="site", raw="raw"):
         with open(os.path.join(site, product, n), "wb") as f:
             f.write(data)
         stations.setdefault(st, {})[(product, datum, kind)] = f"{product}/{n}"
-    # CBBT, MNPT, DAHL, WADC: rebuilt from NOAA CO-OPS observations with a Tidewatch-style
+    # BRDH: added from the VIMS gauge on THREDDS. CBBT, MNPT, DAHL, WADC: rebuilt from NOAA CO-OPS observations with a Tidewatch-style
     # harmonic tide and 36-hour forecast (noaa_override.py); Tidewatch's are stale or aliased
     noaa_notes = {}
     try:
@@ -116,6 +116,9 @@ Links keep the same address and are overwritten each update.</p>
 another gauge (DAHL, WADC): a 27-constituent harmonic tide referenced to m30, and a Tidewatch-style 36-hour
 forecast (tide plus 0.7 times the NWS P-ETSS mean surge, offset to the latest residual). NAVD88 at CBBT and
 Money Point is converted from MLLW with NOAA VDatum (NAVD88 zero 1.92 and 1.77 ft above MLLW).</p>
+<p>BRDH (Back River at Dandy Haven), a Classic Tidewatch station missing from the current Tidewatch, is built
+the same way from the VIMS radar gauge's 1-minute record on the VIMS THREDDS server (MLLW 9.71 ft below the
+gauge), with Sewells Point's P-ETSS surge and NAVD88 from NOAA VDatum (1.63 ft above MLLW).</p>
 <p>Disclaimer: Tidewatch Charts(TM) are automated storm tide forecasts; User assumes all risk.</p>
 <div style="overflow-x:auto"><table><tr><th>Station</th>{head}</tr>
 {chr(10).join(rows)}
