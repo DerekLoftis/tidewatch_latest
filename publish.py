@@ -1,6 +1,7 @@
 """Copy the latest Tidewatch f36 forecasts and 3d/30d hindcasts (chart html
 and CSV, MLLW and NAVD) into site/<product>/ under Tidewatch's own file
-names, plus an index page, for GitHub Pages. Standard library only.
+names, plus an index page, for GitHub Pages. CBBT, MNPT, DAHL and WADC are rebuilt
+from NOAA CO-OPS observations by noaa_override.py (numpy, utide).
 
     python publish.py [site_dir] [raw_dir]
 """
@@ -61,11 +62,29 @@ def main(site="site", raw="raw"):
         with open(os.path.join(site, product, n), "wb") as f:
             f.write(data)
         stations.setdefault(st, {})[(product, datum, kind)] = f"{product}/{n}"
+    # CBBT, MNPT, DAHL, WADC: rebuilt from NOAA CO-OPS observations with a Tidewatch-style
+    # harmonic tide and 36-hour forecast (noaa_override.py); Tidewatch's are stale or aliased
+    noaa_notes = {}
+    try:
+        import noaa_override
+        noaa_notes = noaa_override.apply({p: os.path.join(site, p) for p in ("f36", "3d", "30d")},
+                                         os.path.join(raw, "f36"))
+    except Exception as e:
+        print("noaa_override failed:", e)
+    for st, note in noaa_notes.items():
+        if "error" in note:
+            continue
+        stations[st] = {}
+        for product in ("f36", "3d", "30d"):
+            for n in os.listdir(os.path.join(site, product)):
+                m = NAME.match(n)
+                if m and m.group(1) == st:
+                    stations[st][(product, m.group(3) or "NAVD", m.group(4))] = f"{product}/{n}"
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     write_index(site, stations, now)
     with open(os.path.join(site, "latest.json"), "w") as f:
         json.dump({"updated": now, "source": TIDEWATCH_URL, "files": sum(len(v) for v in stations.values()),
-                   "failed": failed}, f, indent=1)
+                   "noaa_observations": noaa_notes, "failed": failed}, f, indent=1)
     open(os.path.join(site, ".nojekyll"), "w").close()
     print(f"{sum(len(v) for v in stations.values())} files for {len(stations)} stations; {len(failed)} failed")
     for x in failed:
@@ -92,6 +111,11 @@ th,td{{border:1px solid #ccc;padding:4px 8px;text-align:left}}a{{color:#16687E}}
 <body><h1>Tidewatch latest forecasts and hindcasts</h1>
 <p>Copied from <a href="{TIDEWATCH_URL}">Tidewatch</a> every 6 hours; updated {now}.
 Links keep the same address and are overwritten each update.</p>
+<p>CBBT, MNPT (Money Point), DAHL (Dahlgren) and WADC (Washington DC) are built here from NOAA CO-OPS
+6-minute observations, because Tidewatch's records for them are stale (CBBT, MNPT since May 2022) or come from
+another gauge (DAHL, WADC): a 27-constituent harmonic tide referenced to m30, and a Tidewatch-style 36-hour
+forecast (tide plus 0.7 times the NWS P-ETSS mean surge, offset to the latest residual). NAVD88 at CBBT and
+Money Point is converted from MLLW with NOAA VDatum (NAVD88 zero 1.92 and 1.77 ft above MLLW).</p>
 <p>Disclaimer: Tidewatch Charts(TM) are automated storm tide forecasts; User assumes all risk.</p>
 <div style="overflow-x:auto"><table><tr><th>Station</th>{head}</tr>
 {chr(10).join(rows)}
