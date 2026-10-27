@@ -14,6 +14,11 @@ stale or mismatched, written over Tidewatch's own files so everything downstream
     CNRC  Accokeek Creek at Crow's Nest (VIMS    GreenStream/VDEM sensor (greenstream.py archive);
           sensor on GreenStream)                 tide fitted to the archive itself, Dahlgren's
                                                  P-ETSS surge
+    nwps_stations.csv                            stand-ins for stations Tidewatch doesn't publish yet
+                                                 (VDEM, StormSense, USGS and county gauges): NWS NWPS
+                                                 observations, gauge datum moved to MLLW; tide fitted
+                                                 to the NWPS record and nwps_capture.py's hourly
+                                                 archive; surge from the nearest P-ETSS point
 
 For each station and run:
 - Observations: the last 31 days of 6-minute water levels from the CO-OPS Data API,
@@ -89,6 +94,25 @@ STATIONS = {
              "name": "Accokeek Creek at Crow's Nest Research Center", "lat": 38.3626, "navd": 0.691,
              "navd_source": "NOAA VDatum (MDVAchb12 grid)"},
 }
+# Stand-ins for stations missing from Tidewatch (web4), until Tidewatch publishes them: NWS NWPS gauge
+# observations (30 days of 5- to 15-minute stage), moved from the gauge's datum to MLLW by
+# stage_to_mllw_ft (0 for gauges reporting MLLW; checked against VDatum and neighbouring NOAA gauges);
+# hourly heights are archived in nwps/ by nwps_capture.py for the tide fit.
+NWPS_API = "https://api.water.noaa.gov/nwps/v1/gauges/{lid}/stageflow/observed"
+NWPS_CSV = os.path.join(HERE, "nwps_stations.csv")
+if os.path.exists(NWPS_CSV):
+    for _r in csv.DictReader(open(NWPS_CSV)):
+        STATIONS[_r["station"]] = {
+            "nwps": _r["nwps_lid"], "archive": RAW + "nwps/", "column": "stage_ft", "despike": 7,
+            "to_mllw": float(_r["stage_to_mllw_ft"]), "since": "2026-10", "stage_datum": _r["stage_datum"],
+            "change": (_r["datum_change_utc"], float(_r["stage_to_mllw_before_ft"])) if _r["datum_change_utc"] else None,
+            "source": f"NWPS gauge {_r['nwps_lid']} ({_r['operator']})", "datum_note": _r["note"],
+            "surge_from": _r["surge_from"], "surge_name": _r["surge_name"], "msl": float(_r["msl_ft_mllw"]),
+            "name": _r["name"], "lat": float(_r["lat"]), "navd": float(_r["navd88_above_mllw_ft"]),
+            "navd_source": _r["navd_source"], "id": _r["station"]}
+    # the VIMS Georgetown page links GNTD (GTND on NWPS and StormSense): publish both
+    if "GTND" in STATIONS:
+        STATIONS["GNTD"] = STATIONS["GTND"]
 CONSTITUENTS = ["M2", "S2", "N2", "K1", "O1", "K2", "P1", "Q1", "NU2", "MU2", "2N2", "L2", "T2", "LDA2", "J1",
                 "OO1", "NO1", "RHO1", "2Q1", "MK3", "MO3", "M3", "M4", "MS4", "MN4", "S4", "M6"]
 SHORT_RECORD = ["M2", "S2", "N2", "K1", "O1", "Q1", "2N2", "L2", "MK3", "M4", "MS4", "MN4", "M6"]
@@ -124,6 +148,8 @@ def observations(st):
     info = STATIONS[st]
     if "thredds" in info:
         return thredds_observations(info["thredds"], info["gauge_mllw"])
+    if "nwps" in info:
+        return nwps_observations(st, info)
     if "archive" in info:
         return archive_observations(st, info)
     return parse_coops(get(API.format(id=info["noaa"], product="water_level") + "&range=744"))
@@ -168,7 +194,7 @@ def archive_rows(st, info, months):
     keep in this repository (read from GitHub, else from this checkout)."""
     rows = {}
     for m in months:
-        name = f"{st}_{m}.csv"
+        name = f"{info.get('id', st)}_{m}.csv"
         local = os.path.join(HERE, info["archive"].rstrip("/").rsplit("/", 1)[1], name)
         try:
             text = get(info["archive"] + name, tries=1).decode()
@@ -178,7 +204,7 @@ def archive_rows(st, info, months):
             text = open(local).read()
         for r in csv.DictReader(io.StringIO(text)):
             if r[info["column"]] and r.get("model", info.get("model")) == info.get("model"):
-                rows[r["time_utc"]] = float(r[info["column"]]) + info["navd"]
+                rows[r["time_utc"]] = float(r[info["column"]]) + stage_offset(info, r["time_utc"])
     return rows
 
 
@@ -202,6 +228,68 @@ def archive_observations(st, info, days=31):
     t, v = despike(t[keep], v[keep], info.get("despike", 7))
     t = np.array([x.replace(second=0) for x in t])
     return t, v
+
+
+_nwps = {}
+
+
+def stage_offset(info, when):
+    """Feet to add to a reading at `when` (ISO string) for MLLW: NAVD88 archives add navd; NWPS gauges
+    add to_mllw, or the offset before a datum change (some VDEM gauges moved from MLLW to NAVD88)."""
+    if "nwps" not in info:
+        return info["navd"]
+    ch = info.get("change")
+    return ch[1] if ch and when < ch[0] else info["to_mllw"]
+
+
+def nwps_record(info):
+    """(times, stage ft in the gauge's datum) from NWPS: about 30 days, newest last."""
+    if info["nwps"] not in _nwps:
+        js = json.loads(get(NWPS_API.format(lid=info["nwps"])))
+        rows = sorted((datetime.strptime(d["validTime"][:19], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc),
+                       float(d["primary"])) for d in js.get("data") or [] if d.get("primary") not in (None, -999))
+        _nwps[info["nwps"]] = (np.array([r[0] for r in rows]), np.array([r[1] for r in rows], float))
+    return _nwps[info["nwps"]]
+
+
+def nwps_datum_check(info):
+    """A warning when NWPS now lists the gauge on another datum than nwps_stations.csv assumes."""
+    if info.get("stage_datum") not in ("MLLW", "NAVD88"):
+        return None
+    js = json.loads(get(NWPS_API.format(lid=info["nwps"]).rsplit("/stageflow", 1)[0], tries=1))
+    zero = {d.get("abbrev", "").rstrip("*") for d in ((js.get("datums") or {}).get("vertical") or {}).get("value") or []
+            if d.get("value") == 0}
+    listed = "MLLW" if "MLLW" in zero else "NAVD88" if "NAVD88" in zero else None
+    if listed and listed != info["stage_datum"]:
+        return (f"NWPS now lists {info['nwps']} in {listed}, nwps_stations.csv assumes {info['stage_datum']}: "
+                "check for a datum change")
+    return None
+
+
+def nwps_observations(st, info, days=31):
+    """NWPS stage (archived hourly heights fill gaps) in ft above MLLW, quality-controlled and
+    interpolated to 6-minute marks no more than 20 minutes from a reading."""
+    t, v = nwps_record(info)
+    v = v + np.array([stage_offset(info, iso(x)) for x in t])
+    if len(t) < 2:
+        return archive_observations(st, info, days)
+    keep = (v > -5) & (v < 25)
+    t, v = despike(t[keep], v[keep], info.get("despike", 7))
+    rows = archive_rows(st, info, months_between(t[-1] - timedelta(days=days), t[-1]))
+    old = {datetime.strptime(k, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc): x for k, x in rows.items()}
+    old = {k: x for k, x in old.items() if k < t[0]}  # NWPS's own record wins where both exist
+    if old:
+        t = np.concatenate([np.array(sorted(old)), t])
+        v = np.concatenate([np.array([old[k] for k in sorted(old)]), v])
+    sec = np.array([x.timestamp() for x in t])
+    start = t[-1].replace(second=0, microsecond=0) - timedelta(days=days)
+    start -= timedelta(minutes=start.minute % 6)
+    grid = np.arange(start.timestamp(), sec[-1] + 1, 360.0)
+    i = np.clip(np.searchsorted(sec, grid), 1, len(sec) - 1)
+    near = np.minimum(np.abs(sec[i] - grid), np.abs(sec[i - 1] - grid))
+    ok = (grid >= sec[0]) & (near <= 1200) & (sec[i] - sec[i - 1] <= 3 * 3600)
+    g = grid[ok]
+    return np.array([datetime.fromtimestamp(x, timezone.utc) for x in g]), np.interp(g, sec, v)
 
 
 def source_label(st):
@@ -237,6 +325,9 @@ def harmonic_fit(st):
             end = now()
             since = max(datetime.strptime(info["since"], "%Y-%m").replace(tzinfo=timezone.utc), end - timedelta(days=369))
             rows = {k: v for k, v in archive_rows(st, info, months_between(since, end)).items() if k[14:16] == "00"}
+            if "nwps" in info:  # plus the NWPS record itself (30 days)
+                ot, ov = nwps_observations(st, info)
+                rows.update({iso(a): b for a, b in zip(ot, ov) if a.minute == 0})
             t = np.array([np.datetime64(k[:19]) for k in sorted(rows)])
             h = np.array([rows[k] for k in sorted(rows)])
         # under ~6 months of record: only constituents a month separates (Rayleigh criterion), and no
@@ -406,6 +497,10 @@ def write_station(st, b, dirs, pickles):
     sub = f"{source_label(st)} observations; harmonic tide referenced to m30"
     if info.get("surge_from"):
         sub += f"; surge from P-ETSS at {info.get('surge_name', info['surge_from'])}"
+    if "nwps" in info:
+        sub = f"Stand-in until Tidewatch publishes {st}: " + sub
+        if info["to_mllw"]:
+            sub += f"; MLLW = gauge stage {info['to_mllw']:+.2f} ft"
     for datum, label, shift in (("MLLW", "MLLW", 0.0), ("NAVD", "NAVD88", -info["navd"])):
         # f36: Tidewatch's CSV columns (pa30 = m30 tide, anom = forecast residual, px30 = forecast)
         if "f36" in dirs:
@@ -487,7 +582,14 @@ def apply(dirs, pickles=None, stations=None):
         surges, cycle = {}, None
         print("noaa_override: P-ETSS unavailable:", e)
     notes = {}
+    # a stand-in steps aside once Tidewatch itself publishes the station (publish.py copies it first)
+    on_tidewatch = {st for st in stations if "nwps" in STATIONS[st] and "f36" in dirs
+                    and os.path.exists(os.path.join(dirs["f36"], f"{st}_2018_f36_MLLW.csv"))}
     for st in stations:
+        if st in on_tidewatch:
+            notes[st] = {"error": "Tidewatch publishes this station; stand-in not built"}
+            print(f"  {st}: Tidewatch publishes it now; stand-in not built")
+            continue
         try:
             t, v = observations(st)
             if len(t) < 240 or t[-1] < now() - timedelta(hours=12):
@@ -497,6 +599,14 @@ def apply(dirs, pickles=None, stations=None):
             notes[st] = {"latest_obs": iso(b["t0"]), "m30_ft_mllw": round(b["m30"], 3),
                          "navd88_above_mllw_ft": STATIONS[st]["navd"], "forecast": b["guidance"],
                          "petss_cycle": cycle.strftime("%Y-%m-%dT%HZ") if cycle else None}
+            if "nwps" in STATIONS[st]:
+                try:
+                    warn = nwps_datum_check(STATIONS[st])
+                except Exception as e:
+                    warn = None
+                if warn:
+                    notes[st]["warning"] = warn
+                    print(f"  {st}: WARNING {warn}")
             print(f"  {st}: {source_label(st)} to {b['t0']:%Y-%m-%d %H:%MZ}, m30 {b['m30']:.2f} ft MLLW, "
                   f"{b['guidance']}")
         except Exception as e:

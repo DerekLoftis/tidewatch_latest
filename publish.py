@@ -1,7 +1,8 @@
 """Copy the latest Tidewatch f36 forecasts and 3d/30d hindcasts (chart html
 and CSV, MLLW and NAVD) into site/<product>/ under Tidewatch's own file
 names, plus an index page, for GitHub Pages. CBBT, MNPT, DAHL and WADC are rebuilt
-from NOAA CO-OPS observations by noaa_override.py (numpy, utide).
+from NOAA CO-OPS observations by noaa_override.py (numpy, utide), which also builds BRDH, USLN-X,
+CNRC and stand-ins from NWS NWPS observations for the stations in nwps_stations.csv.
 
     python publish.py [site_dir] [raw_dir]
 """
@@ -91,6 +92,17 @@ def main(site="site", raw="raw"):
         print("  failed:", x)
 
 
+def nwps_ids():
+    try:
+        import noaa_override
+        return {st for st, i in noaa_override.STATIONS.items() if "nwps" in i}
+    except Exception:
+        return set()
+
+
+NWPS_IDS = nwps_ids()
+
+
 def write_index(site, stations, now):
     cols = [(p, d) for p in ("f36", "3d", "30d") for d in ("MLLW", "NAVD")]
     head = "".join(f"<th>{p} {d}</th>" for p, d in cols)
@@ -129,6 +141,12 @@ Monitoring System (VDEM), archived every 6 hours in
 <a href="https://github.com/DerekLoftis/tidewatch_latest/tree/main/greenstream">greenstream/</a>. Its tide is
 fitted to that archive (13 constituents until it holds 6 months, then 27), with Dahlgren's P-ETSS surge and
 NAVD88 from NOAA VDatum (0.69 ft above MLLW).</p>
+<p>Stand-ins: {", ".join(sorted(st for st in stations if st in NWPS_IDS))} are not on Tidewatch yet (their
+VIMS pages link here), so until Tidewatch publishes them they are built the same way from the NWS NWPS
+gauge observations (VDEM, StormSense, USGS, county and NOAA gauges; GNTD repeats GTND, Georgetown): the
+gauge datum moved to MLLW (details in <a href="https://github.com/DerekLoftis/tidewatch_latest/blob/main/nwps_stations.csv">nwps_stations.csv</a>),
+a harmonic tide fitted to the record, and the P-ETSS surge of the nearest P-ETSS point. Each steps aside as
+soon as Tidewatch publishes the station.</p>
 <p>Disclaimer: Tidewatch Charts(TM) are automated storm tide forecasts; User assumes all risk.</p>
 <div style="overflow-x:auto"><table><tr><th>Station</th>{head}</tr>
 {chr(10).join(rows)}
