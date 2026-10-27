@@ -1,6 +1,6 @@
 # Archive FloodVISION-AI's webcam water levels for USLN-X (floodvision.py) and GreenStream's
-# CNRC sensor (greenstream.py) ahead of each 6-hourly publish; both sites keep about 30 days,
-# so a missed run loses nothing.
+# CNRC sensor (greenstream.py) ahead of each 6-hourly publish, and hourly NWPS water levels for the
+# stand-in stations (nwps_capture.py); all three sources keep about 30 days, so a missed run loses nothing.
 name: Archive USLN-X and CNRC
 
 on:
@@ -32,11 +32,14 @@ jobs:
         continue-on-error: true
       - run: python greenstream.py greenstream
         continue-on-error: true
+      # hourly NWPS water levels for the stand-in stations (nwps_stations.csv); NWPS keeps 30 days
+      - run: python nwps_capture.py nwps
+        continue-on-error: true
       - name: Commit new rows
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898237+github-actions[bot]@users.noreply.github.com"
-          git add floodvision greenstream
+          git add floodvision greenstream nwps
           git diff --cached --quiet && exit 0
           git commit -m "USLN-X and CNRC capture $(date -u +%Y-%m-%dT%H:%MZ)"
           git pull --rebase -q origin main && git push -q origin HEAD:main
