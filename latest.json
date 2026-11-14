@@ -1,0 +1,478 @@
+{
+ "updated": "2026-11-14 12:25 UTC",
+ "source": "https://web4.vims.edu/physical/tidewatch/",
+ "files": 936,
+ "noaa_observations": {
+  "CBBT": {
+   "stale": false,
+   "stand_in": false,
+   "sources": "NOAA CO-OPS 8638901 observations; harmonic tide referenced to m30",
+   "latest_obs": "2026-11-14T12:18:00Z",
+   "m30_ft_mllw": 2.473,
+   "navd88_above_mllw_ft": 1.92,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "MNPT": {
+   "stale": false,
+   "stand_in": false,
+   "sources": "NOAA CO-OPS 8639348 observations; harmonic tide referenced to m30",
+   "latest_obs": "2026-11-14T12:18:00Z",
+   "m30_ft_mllw": 2.74,
+   "navd88_above_mllw_ft": 1.77,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "DAHL": {
+   "stale": false,
+   "stand_in": false,
+   "sources": "NOAA CO-OPS 8635027 observations; harmonic tide referenced to m30",
+   "latest_obs": "2026-11-14T12:18:00Z",
+   "m30_ft_mllw": 1.987,
+   "navd88_above_mllw_ft": 1.04,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "WADC": {
+   "stale": false,
+   "stand_in": false,
+   "sources": "NOAA CO-OPS 8594900 observations; harmonic tide referenced to m30",
+   "latest_obs": "2026-11-14T12:12:00Z",
+   "m30_ft_mllw": 2.291,
+   "navd88_above_mllw_ft": 1.4,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "BRDH": {
+   "stale": false,
+   "stand_in": false,
+   "sources": "VIMS gauge BRDH observations; harmonic tide referenced to m30; surge from P-ETSS at Sewells Point",
+   "latest_obs": "2026-11-14T11:24:00Z",
+   "m30_ft_mllw": 2.361,
+   "navd88_above_mllw_ft": 1.63,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "USLN-X": {
+   "stale": false,
+   "stand_in": false,
+   "sources": "FloodVISION-AI webcam (USGS 0204295505) observations; harmonic tide referenced to m30; surge from P-ETSS at Little Neck Creek (USLN)",
+   "latest_obs": "2026-11-14T11:54:00Z",
+   "m30_ft_mllw": 2.452,
+   "navd88_above_mllw_ft": 1.372,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "CNRC": {
+   "stale": false,
+   "stand_in": false,
+   "sources": "GreenStream sensor (VDEM Virginia Flood Monitoring System) observations; harmonic tide referenced to m30; surge from P-ETSS at Dahlgren",
+   "latest_obs": "2026-11-14T12:05:00Z",
+   "m30_ft_mllw": 1.068,
+   "navd88_above_mllw_ft": 0.691,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "SLIM": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes SLIM: NWPS gauge SLIM2 (NOAA NOS) observations; harmonic tide referenced to m30; surge from P-ETSS at Patuxent River at Solomons Island",
+   "latest_obs": "2026-11-14T11:48:00Z",
+   "m30_ft_mllw": 1.673,
+   "navd88_above_mllw_ft": 0.86,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "BBIV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes BBIV: NWPS gauge BBIV2 (City of Virginia Beach) observations; harmonic tide referenced to m30; surge from P-ETSS at Little Neck Creek at Pinewood Rd in Virginia Beach",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 2.399,
+   "navd88_above_mllw_ft": 1.43,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "CCHV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes CCHV: NWPS gauge CCHV2 (The University of Virginia) observations; harmonic tide referenced to m30; surge from P-ETSS at Atlantic Coast at Wachapreague",
+   "latest_obs": "2026-11-14T11:24:00Z",
+   "m30_ft_mllw": 3.669,
+   "navd88_above_mllw_ft": 2.857,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "DPCV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes DPCV: NWPS gauge DPCV2 (USACE) observations; harmonic tide referenced to m30; surge from P-ETSS at Elizabeth River near Money Point; MLLW = gauge stage -0.90 ft",
+   "latest_obs": "2026-11-14T11:30:00Z",
+   "m30_ft_mllw": 2.808,
+   "navd88_above_mllw_ft": 1.657,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "LSPV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes LSPV: NWPS gauge LSPV2 (Prince William County) observations; harmonic tide referenced to m30; surge from P-ETSS at Potomac River at Leesylvania State Park",
+   "latest_obs": "2026-11-14T11:30:00Z",
+   "m30_ft_mllw": 1.955,
+   "navd88_above_mllw_ft": 0.912,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "HPPV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes HPPV: NWPS gauge HPPV2 (City of Virginia Beach) observations; harmonic tide referenced to m30; surge from P-ETSS at Elizabeth River at the Midtown Tunnel",
+   "latest_obs": "2026-11-14T12:06:00Z",
+   "m30_ft_mllw": 2.308,
+   "navd88_above_mllw_ft": 1.76,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "RDIV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes RDIV: NWPS gauge RDIV2 (City of Virginia Beach) observations; harmonic tide referenced to m30; surge from P-ETSS at Lake Rudee near Bells Rd in Virginia Beach",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 2.324,
+   "navd88_above_mllw_ft": 2.25,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "SGSM": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes SGSM: NWPS gauge SGSM2 (St Marys County Government) observations; harmonic tide referenced to m30; surge from P-ETSS at St. George Creek at Straits Point",
+   "latest_obs": "2026-11-14T11:24:00Z",
+   "m30_ft_mllw": 1.856,
+   "navd88_above_mllw_ft": 0.888,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "ALEV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes ALEV: NWPS gauge ALEV2 (USGS) observations; harmonic tide referenced to m30; surge from P-ETSS at Potomac River at Alexandria; MLLW = gauge stage +1.35 ft",
+   "latest_obs": "2026-11-14T11:12:00Z",
+   "m30_ft_mllw": 1.986,
+   "navd88_above_mllw_ft": 1.351,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "AXTV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes AXTV: NWPS gauge AXTV2 (USGS) observations; harmonic tide referenced to m30; surge from P-ETSS at Potomac River at Alexandria; MLLW = gauge stage +1.32 ft",
+   "latest_obs": "2026-11-14T11:48:00Z",
+   "m30_ft_mllw": 2.439,
+   "navd88_above_mllw_ft": 1.321,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "BPAD": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes BPAD: NWPS gauge BPAD2 (USGS) observations; harmonic tide referenced to m30; surge from P-ETSS at Washington Channel at SW Waterfront; MLLW = gauge stage +1.43 ft",
+   "latest_obs": "2026-11-14T11:30:00Z",
+   "m30_ft_mllw": 2.161,
+   "navd88_above_mllw_ft": 1.429,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "CRSM": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes CRSM: NWPS gauge CRSM2 (USGS) observations; harmonic tide referenced to m30; surge from P-ETSS at Chesapeake Bay above Little Annemessex River at Crisfield MD",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 1.842,
+   "navd88_above_mllw_ft": 1.16,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "EZMV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes EZMV: NWPS gauge EZMV2 (USGS) observations; harmonic tide referenced to m30; surge from P-ETSS at Elizabeth River at the Midtown Tunnel",
+   "latest_obs": "2026-11-14T11:48:00Z",
+   "m30_ft_mllw": 2.752,
+   "navd88_above_mllw_ft": 1.76,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "GTND": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes GTND: NWPS gauge GTND2 (USGS) observations; harmonic tide referenced to m30; surge from P-ETSS at Washington Channel at SW Waterfront; MLLW = gauge stage -0.90 ft",
+   "latest_obs": "2026-11-14T11:54:00Z",
+   "m30_ft_mllw": 2.394,
+   "navd88_above_mllw_ft": 1.384,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "IHDM": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes IHDM: NWPS gauge IHDM2 (USGS) observations; harmonic tide referenced to m30; surge from P-ETSS at Potomac River at Indian Head",
+   "latest_obs": "2026-11-14T11:42:00Z",
+   "m30_ft_mllw": 1.85,
+   "navd88_above_mllw_ft": 0.954,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "LENM": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes LENM: NWPS gauge LENM2 (USGS) observations; harmonic tide referenced to m30; surge from P-ETSS at St. George Creek at Straits Point; MLLW = gauge stage +1.00 ft",
+   "latest_obs": "2026-11-14T11:42:00Z",
+   "m30_ft_mllw": 1.827,
+   "navd88_above_mllw_ft": 0.997,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "RICV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes RICV: NWPS gauge RICV2 (USGS) observations; harmonic tide referenced to m30; surge from P-ETSS at James River (VA) at Jamestown/Scotland Ferry; MLLW = gauge stage +1.68 ft",
+   "latest_obs": "2026-11-14T11:54:00Z",
+   "m30_ft_mllw": 3.063,
+   "navd88_above_mllw_ft": 1.675,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "ARPV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes ARPV: NWPS gauge ARPV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at James River (VA) at Jamestown/Scotland Ferry; MLLW = gauge stage -6.23 ft",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 3.802,
+   "navd88_above_mllw_ft": 1.798,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "CHIV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes CHIV: NWPS gauge CHIV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Atlantic Coast at Wachapreague",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 2.04,
+   "navd88_above_mllw_ft": 1.54,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "ELGV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes ELGV: NWPS gauge ELGV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Elizabeth River at the Midtown Tunnel",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 2.752,
+   "navd88_above_mllw_ft": 1.79,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "FEDV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes FEDV: NWPS gauge FEDV2 (State of Virginia) observations; harmonic tide referenced to m30; surge from P-ETSS at Rappahannock River at Tappahannock; MLLW = gauge stage -2.45 ft",
+   "latest_obs": "2026-11-14T11:42:00Z",
+   "m30_ft_mllw": 2.484,
+   "navd88_above_mllw_ft": 1.877,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "JLMV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes JLMV: NWPS gauge JLMV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at James River (VA) at Sewell's Point; MLLW = gauge stage +1.69 ft",
+   "latest_obs": "2026-11-14T12:06:00Z",
+   "m30_ft_mllw": 2.566,
+   "navd88_above_mllw_ft": 1.69,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "JPHV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes JPHV: NWPS gauge JPHV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at James River (VA) at Jamestown/Scotland Ferry",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 2.489,
+   "navd88_above_mllw_ft": 1.56,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "KMNV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes KMNV: NWPS gauge KMNV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at James River (VA) at Sewell's Point",
+   "latest_obs": "2026-11-14T12:06:00Z",
+   "m30_ft_mllw": 2.686,
+   "navd88_above_mllw_ft": 1.75,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "LCEV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes LCEV: NWPS gauge LCEV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Chesapeake Bay at Chesapeake Bay Bridge Tunnel",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 2.239,
+   "navd88_above_mllw_ft": 1.81,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "NRSV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes NRSV: NWPS gauge NRSV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Nansemond River at Sleepy Hole Park",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 2.616,
+   "navd88_above_mllw_ft": 1.8,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "ONAV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes ONAV: NWPS gauge ONAV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Chesapeake Bay near Pungoteague Creek at Harborton",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 2.074,
+   "navd88_above_mllw_ft": 1.6,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "PCCV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes PCCV: NWPS gauge PCCV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Elizabeth River near Money Point",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 2.554,
+   "navd88_above_mllw_ft": 1.84,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "PRTV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes PRTV: NWPS gauge PRTV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Chesapeake Bay at Port Isobel/Tangier Island",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 1.994,
+   "navd88_above_mllw_ft": 1.3,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "SAXV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes SAXV: NWPS gauge SAXV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Chesapeake Bay near Starling Creek at Saxis",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 2.221,
+   "navd88_above_mllw_ft": 1.53,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "SLRV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes SLRV: NWPS gauge SLRV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at James River (VA) at Sewell's Point; MLLW = gauge stage +1.68 ft",
+   "latest_obs": "2026-11-14T12:06:00Z",
+   "m30_ft_mllw": 2.263,
+   "navd88_above_mllw_ft": 1.68,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "SMSV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes SMSV: NWPS gauge SMSV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Pagan River at Smithfield Station; MLLW = gauge stage +1.10 ft",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 2.51,
+   "navd88_above_mllw_ft": 1.536,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "WCKV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes WCKV: NWPS gauge WCKV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Piankatank River above Wharf Creek near Hudgins VA",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 1.387,
+   "navd88_above_mllw_ft": 1.1,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "WRDV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes WRDV: NWPS gauge WRDV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Pagan River at Smithfield Station; MLLW = gauge stage +1.66 ft",
+   "latest_obs": "2026-11-14T12:06:00Z",
+   "m30_ft_mllw": 2.573,
+   "navd88_above_mllw_ft": 1.66,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "WRSV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes WRSV: NWPS gauge WRSV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Pagan River at Smithfield Station; MLLW = gauge stage +1.70 ft",
+   "latest_obs": "2026-11-14T12:06:00Z",
+   "m30_ft_mllw": 3.154,
+   "navd88_above_mllw_ft": 1.7,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "WRVV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes WRVV: NWPS gauge WRVV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Ware River near Schley",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 2.264,
+   "navd88_above_mllw_ft": 1.64,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "WSPV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes WSPV: NWPS gauge WSPV2 (VDEM) observations; harmonic tide referenced to m30; surge from P-ETSS at Chesapeake Bay near Yorktown",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 2.986,
+   "navd88_above_mllw_ft": 2.0,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "RAPV": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes RAPV: NWPS gauge RAPV2 (USGS) observations; harmonic tide referenced to m30; surge from P-ETSS at Rappahannock River at Tappahannock",
+   "latest_obs": "2026-11-14T12:00:00Z",
+   "m30_ft_mllw": 1.466,
+   "navd88_above_mllw_ft": 1.295,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "VIMS": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes VIMS: NWPS gauge YKTV2 (NOAA CO-OPS Yorktown USCG 8637689, across the York River) observations; harmonic tide referenced to m30; surge from P-ETSS at Chesapeake Bay near Yorktown",
+   "latest_obs": "2026-11-14T11:54:00Z",
+   "m30_ft_mllw": 2.312,
+   "navd88_above_mllw_ft": 1.53,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  },
+  "GNTD": {
+   "stale": false,
+   "stand_in": true,
+   "sources": "Stand-in until Tidewatch publishes GNTD: NWPS gauge GTND2 (USGS) observations; harmonic tide referenced to m30; surge from P-ETSS at Washington Channel at SW Waterfront; MLLW = gauge stage -0.90 ft",
+   "latest_obs": "2026-11-14T11:54:00Z",
+   "m30_ft_mllw": 2.394,
+   "navd88_above_mllw_ft": 1.384,
+   "forecast": "P-ETSS ensemble-mean surge x 0.7, offset to the latest residual",
+   "petss_cycle": "2026-11-14T06Z"
+  }
+ },
+ "failed": []
+}
