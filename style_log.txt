@@ -1,0 +1,3 @@
+f36: 158 of 158 pages styled
+3d: 157 of 158 pages styled; USSF_2018_3d_MLLW_hc.html.gz: AssertionError: unexpected page layout
+30d: 158 of 158 pages styled
