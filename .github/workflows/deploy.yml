@@ -1,5 +1,5 @@
 # Deploys the published Tidewatch latest site to GitHub Pages. The site is built in the private
-# DerekLoftis/tidewatch_archive (its tidewatch_site.yml, every 6 hours), pushed to this repository's
+# DerekLoftis/tidewatch_forecastmodel (its tidewatch_site.yml, every 6 hours), pushed to this repository's
 # `site` branch, and announced with a `publish` repository_dispatch, which runs this workflow. It can
 # also be run by hand to redeploy the newest `site` branch.
 name: Deploy site
@@ -32,5 +32,17 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
-      - id: deploy
+      # deploy-pages sometimes can't see the artifact just uploaded ("No artifacts named
+      # github-pages were found"), a GitHub-side lag. Try again after a short wait.
+      - id: deploy_first
         uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - name: Wait before retrying the deploy
+        if: steps.deploy_first.outcome == 'failure'
+        run: sleep 45
+      - id: deploy_retry
+        if: steps.deploy_first.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+      - id: deploy
+        name: Page URL
+        run: echo "page_url=${{ steps.deploy_first.outputs.page_url || steps.deploy_retry.outputs.page_url }}" >> "$GITHUB_OUTPUT"
